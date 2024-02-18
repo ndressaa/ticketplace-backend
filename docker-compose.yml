@@ -1,0 +1,21 @@
+version: '3.9'
+services:
+  ticketplace-api:
+    container_name: ticketplace-api
+    image: ticketplace-api
+    restart: always
+    ports:
+      - 8080:8080
+    environment:
+      # Try to use the host.docker.internal to connect to the host machine
+      DB_HOST: host.docker.internal
+
+# Keep this network configuration to allow the containers to communicate with each other
+# in case of `host.docker.internal` not working
+networks:
+  ticketplace:
+    driver: bridge
+    ipam:
+      config:
+        # 16 IPs 192.168.50.0 - 192.168.50.15 - 14 usable IPs
+        - subnet: 192.168.50.0/28
