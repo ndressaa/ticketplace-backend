@@ -4,11 +4,11 @@
 echo "ENV: $NODE_ENV"
 if [[ "$NODE_ENV" == "development" ]]; then
   # Use source map if exists
-  if [[ -f "dist/app.js.map" ]]; then
-    node --enable-source-maps=dist/app.js.map --trace-warnings dist/app.js
+  if [[ -f "dist/index.js.map" ]]; then
+    node --enable-source-maps=dist/app.js.map --trace-warnings dist/index.js
   else
-    node --trace-warnings dist/app.js
+    node --trace-warnings dist/index.js
   fi
 else
-  node dist/app.js
+  node dist/index.js
 fi

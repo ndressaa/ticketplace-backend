@@ -38,8 +38,8 @@ export interface DatabaseOptions {
 export interface DBError extends DatabaseError {}
 
 const options: DatabaseOptions = {
-  host: process.env.DB_HOST || "database",
-  port: 5432,
+  host: process.env.DB_HOST || "127.0.0.1",
+  port: process.env.DB_PORT ? parseInt(process.env.DB_PORT) : 5432,
   database: "ticketplace-db",
   user: "postgres",
   password: "semsenha",
@@ -113,14 +113,21 @@ class DBClient {
     values?: Array<any>,
     transaction?: PoolClient
   ): Promise<Array<T>> {
-    const client = transaction || (await this.connect());
+    let client: PoolClient | null = null;
     try {
+      client = transaction || (await this.connect());
       const result = await client.query(query, values);
       return result.rows;
     } catch (err) {
+      console.error({
+        message: "Error while running `query()`",
+        query,
+        values,
+        error: err,
+      });
       throw err;
     } finally {
-      if (!transaction) client.release();
+      if (!transaction && client) client.release();
     }
   }
 

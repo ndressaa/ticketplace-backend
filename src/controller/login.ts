@@ -85,24 +85,31 @@ function decodeToken(token: string) {
  * @param context
  * @returns
  */
-export const validadeToken = async (context: Context): Promise<boolean> => {
+export const validateToken = async (context: Context): Promise<boolean> => {
   const { request, response } = context;
 
   const authHeader = request.headers["authorization"];
   if (authHeader) {
     const [bearer, token] = authHeader.split(" ");
+    console.debug({
+      validateToken: {
+        bearer,
+        token,
+      },
+    });
+
     if (bearer === "Bearer" && token) {
       try {
         decodeToken(token);
 
         const foundUser = await dbClient.query<User>(
-          `SELECT * FROM users WHERE "token" = ?`,
+          `SELECT * FROM public.user WHERE "token" = $1`,
           [token]
         );
 
         if (foundUser.length === 1) return true;
       } catch (error) {
-        response.raiseError(401, `Unauthorized: ${error.message}`);
+        response.raiseError(401, `Unauthorized: ${(error as Error).message}`);
         return false;
       }
     }
@@ -140,12 +147,20 @@ export const newUser: Controller<ResponseObject<Token>> = async (context) => {
     const hashedPassword = await hashPassword(password);
     const token = getToken();
 
+    console.debug({
+      newUser: {
+        data,
+        hashedPassword,
+        token,
+      },
+    });
+
     const dbTransaction = await dbClient.startTransaction();
 
     const user = await dbClient.query<DBColumns<User>>(
-      `INSERT INTO users 
+      `INSERT INTO public.user
         ("name", "email", "password", "token") 
-      VALUES (?, ?, ?)
+      VALUES ($1, $2, $3, $3)
       RETURNING *`,
       [name, email, hashedPassword, token],
       dbTransaction
@@ -169,7 +184,7 @@ export const newUser: Controller<ResponseObject<Token>> = async (context) => {
   } catch (error) {
     if (error instanceof ControllerError) throw error;
     throw new ControllerError(
-      `Error while creating user: ${error.message}`,
+      `Error while creating user: ${(error as Error).message}`,
       400
     );
   }
@@ -186,15 +201,28 @@ export const login: Controller<ResponseObject<Token>> = async (context) => {
 
   const authHeader = headers["authorization"];
   if (authHeader) {
-    const auth = authHeader.split(" ")[1];
+    const [authMethod, auth] = authHeader.split(" ");
+    if (authMethod !== "Basic" || !auth) {
+      throw new ControllerError("Unauthorized", 401);
+    }
+
     const decodedAuth = Buffer.from(auth, "base64").toString().split(":");
     const email = decodedAuth[0];
     const pass = decodedAuth[1];
+    console.log(`email: ${email} pass: ${pass}`);
     if (email && pass) {
       const foundUser = await dbClient.query<User>(
-        `SELECT * FROM users WHERE "email" = ?`,
+        `SELECT * FROM public.user WHERE "email" = $1`,
         [email]
       );
+      console.debug({
+        login: {
+          select: {
+            email,
+            foundUser,
+          },
+        },
+      });
 
       if (foundUser.length > 1) {
         throw new ControllerError(
@@ -206,8 +234,26 @@ export const login: Controller<ResponseObject<Token>> = async (context) => {
       if (foundUser.length !== 0) {
         const { password } = foundUser[0];
         const isPasswordValid = await comparePasswords(pass, password);
+        console.debug({
+          login: {
+            passwordCompare: {
+              receivedPassword: pass,
+              dbPassword: password,
+              valid: isPasswordValid,
+            },
+          },
+        });
         if (isPasswordValid) {
           const token = getToken();
+
+          await dbClient.query(
+            `
+            UPDATE public.user
+            SET "token" = $1
+            WHERE "email" = $2
+          `,
+            [token, email]
+          );
 
           const payload: ResponseObject<Token> = {
             statusCode: 201,

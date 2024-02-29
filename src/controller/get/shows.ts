@@ -13,25 +13,26 @@ const dbClient = new DBClient();
 const shows: Controller<Array<RetornableShowColumns>> = async (context) => {
   const { id, searchParams } = context;
 
-  let sql = "SELECT * FROM public.shows WHERE 1 = 1";
+  let sql = "SELECT * FROM public.show WHERE 1 = 1";
   let params: string[] = [];
 
+  let placeholderIndex = 1;
   if (id) {
-    sql += " AND id = ?";
+    sql += ` AND id = $${placeholderIndex++}`;
     params.push(id);
   } else {
     searchParams.forEach((value, key) => {
       if (key === "title") {
-        sql += ' AND "title" = ?';
+        sql += ` AND "title" = $${placeholderIndex++}`;
         params.push(value);
       } else if (key === "description") {
-        sql += ' AND "description" = ?';
+        sql += ` AND "description" = $${placeholderIndex++}`;
         params.push(value);
       } else if (key === "descriptionLike") {
-        sql += ` AND "description" like '%?%'`;
+        sql += ` AND "description" LIKE $${placeholderIndex++}`;
         params.push(value);
       } else if (key === "value") {
-        sql += ' AND "value" = ?';
+        sql += ` AND "value" = $${placeholderIndex++}`;
         params.push(value);
       } else {
         throw new ControllerError(`Invalid search parameter: ${key}`, 400);

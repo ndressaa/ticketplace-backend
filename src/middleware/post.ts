@@ -4,14 +4,15 @@ import type { Context } from "../controller/types";
 
 import controllers from "../controller/post";
 import ControllerError from "../controller/ControllerError";
-import { validadeToken } from "../controller/login";
+import { validateToken } from "../controller/login";
 
 const post: Middleware = async (context) => {
   const { request: req, response: res } = context;
 
   const urlParts = req.url.split("/");
 
-  const [version, path, id] = urlParts as [
+  const [, version, path, id] = urlParts as [
+    string,
     string | undefined,
     ControllerName | undefined,
     string | undefined
@@ -24,14 +25,17 @@ const post: Middleware = async (context) => {
 
   // Performs authentication
   if (path !== "newUser") {
-    const isTokenValid = await validadeToken(context);
+    const isTokenValid = await validateToken(context);
     if (!isTokenValid) return;
   }
 
   const controller = controllers[path as keyof typeof controllers];
 
+  console.debug({ request: { version, path, id } });
+
   if (version !== "v1" || !controller) {
     res.raiseError(501, "Not implemented");
+    return;
   }
 
   let body = "";
@@ -47,6 +51,13 @@ const post: Middleware = async (context) => {
         body,
         id,
       };
+
+      console.debug({
+        post: {
+          controller: controller ? controller.name || controller : "unknown",
+          context: controllerContext,
+        },
+      });
 
       try {
         const data = await controller(controllerContext);

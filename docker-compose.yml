@@ -9,6 +9,8 @@ services:
     environment:
       # Try to use the host.docker.internal to connect to the host machine
       DB_HOST: host.docker.internal
+    networks:
+      - ticketplace
 
 # Keep this network configuration to allow the containers to communicate with each other
 # in case of `host.docker.internal` not working

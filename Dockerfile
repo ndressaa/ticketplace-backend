@@ -17,7 +17,7 @@ COPY src/entrypoint.sh /entrypoint
 RUN chmod +x /entrypoint
 
 # Copy transpiled files
-COPY dist/ticketplace-api /opt/quality24/dist
+COPY dist/ticketplace-api /opt/ticketplace/dist
 
 ENV PROJECT_NAME ticketplace-api
 ENV LISTEN_PORT 8080

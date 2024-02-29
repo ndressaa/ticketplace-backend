@@ -1,3 +1,8 @@
-
+# Removes library (this is the compiled code from other libraries)
 node_modules
+
+# Removes build (this is the transpiled code)
 dist
+
+# Removes tsbuildinfo (this keeps track of the build process)
+tsconfig.tsbuildinfo
