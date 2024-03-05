@@ -1,16 +1,16 @@
 import type { ControllerName } from "../types";
 
-import users from "./users";
-import shows from "./shows";
+import usuarios from "./usuarios";
+import eventos from "./eventos";
 
 import { login } from "../login";
 
 const controllers: Record<
-  "users" | "shows" | "login",
-  typeof users | typeof shows | typeof login
+  "usuarios" | "eventos" | "login",
+  typeof usuarios | typeof eventos | typeof login
 > = {
-  users,
-  shows,
+  usuarios,
+  eventos,
   login,
 };
 

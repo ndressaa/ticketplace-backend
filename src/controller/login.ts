@@ -3,12 +3,10 @@ import { genSalt, hash, compare } from "bcrypt";
 import type { Context } from "../types";
 import type { Controller, ResponseObject } from "./types";
 import type { Token } from "./types";
-import type { User } from "../tables/user";
-import type { DBColumns } from "../tables/types";
 
 import ControllerError from "./ControllerError";
 import DBClient from "../utils/DBClient";
-import { getRetornableUserColumns } from "../tables/user";
+import { Usuarios } from "../tables/usuarios";
 
 const dbClient = new DBClient();
 
@@ -102,8 +100,8 @@ export const validateToken = async (context: Context): Promise<boolean> => {
       try {
         decodeToken(token);
 
-        const foundUser = await dbClient.query<User>(
-          `SELECT * FROM public.user WHERE "token" = $1`,
+        const foundUser = await dbClient.query<Usuarios.Table>(
+          `SELECT * FROM public.tb_usuarios WHERE "token" = $1`,
           [token]
         );
 
@@ -132,7 +130,7 @@ export const newUser: Controller<ResponseObject<Token>> = async (context) => {
   }
 
   try {
-    const data = JSON.parse(body) as Partial<User>;
+    const data = JSON.parse(body) as Partial<Usuarios.Table>;
     const { name, email, password } = data;
 
     if (!name || !email || !password) {
@@ -157,8 +155,8 @@ export const newUser: Controller<ResponseObject<Token>> = async (context) => {
 
     const dbTransaction = await dbClient.startTransaction();
 
-    const user = await dbClient.query<DBColumns<User>>(
-      `INSERT INTO public.user
+    const user = await dbClient.query<Usuarios.Table>(
+      `INSERT INTO public.tb_usuarios
         ("name", "email", "password", "token") 
       VALUES ($1, $2, $3, $3)
       RETURNING *`,
@@ -177,7 +175,7 @@ export const newUser: Controller<ResponseObject<Token>> = async (context) => {
 
     const payload: ResponseObject<Token> = {
       statusCode: 201,
-      content: { token, user: getRetornableUserColumns(user[0]) },
+      content: { token, user: Usuarios.parseRetornableColumns(user[0]) },
     };
 
     return payload;
@@ -211,8 +209,8 @@ export const login: Controller<ResponseObject<Token>> = async (context) => {
     const pass = decodedAuth[1];
     console.log(`email: ${email} pass: ${pass}`);
     if (email && pass) {
-      const foundUser = await dbClient.query<User>(
-        `SELECT * FROM public.user WHERE "email" = $1`,
+      const foundUser = await dbClient.query<Usuarios.Table>(
+        `SELECT * FROM public.tb_usuarios WHERE "email" = $1`,
         [email]
       );
       console.debug({
@@ -248,7 +246,7 @@ export const login: Controller<ResponseObject<Token>> = async (context) => {
 
           await dbClient.query(
             `
-            UPDATE public.user
+            UPDATE public.tb_usuarios
             SET "token" = $1
             WHERE "email" = $2
           `,
@@ -257,7 +255,10 @@ export const login: Controller<ResponseObject<Token>> = async (context) => {
 
           const payload: ResponseObject<Token> = {
             statusCode: 201,
-            content: { token, user: getRetornableUserColumns(foundUser[0]) },
+            content: {
+              token,
+              user: Usuarios.parseRetornableColumns(foundUser[0]),
+            },
           };
 
           return payload;

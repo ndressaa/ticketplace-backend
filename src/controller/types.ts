@@ -1,7 +1,7 @@
 import type { IncomingHttpHeaders } from "http";
 
 import type { RetornableColumns } from "../tables/types";
-import type { RetornableUserColumns } from "../tables/user";
+import type { Usuarios } from "../tables/usuarios";
 export interface Token {
   /**
    * The loged user token
@@ -17,7 +17,7 @@ export interface Token {
   /**
    * The user information
    */
-  user: RetornableUserColumns;
+  user: Usuarios.RetornableColumns;
 }
 
 /**

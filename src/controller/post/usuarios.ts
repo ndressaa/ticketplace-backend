@@ -1,5 +1,5 @@
 import type { Controller } from "../types";
-import type { User } from "../../tables/user";
+import type { Usuarios } from "../../tables/usuarios";
 
 import DBClient from "../../utils/DBClient";
 import ControllerError from "../ControllerError";
@@ -13,13 +13,13 @@ const users: Controller<true> = async (context) => {
     throw new ControllerError("Invalid data received: Missing body", 400);
   }
 
-  const data = JSON.parse(body) as Array<Partial<User>>;
+  const data = JSON.parse(body) as Array<Partial<Usuarios.Table>>;
 
   if (!data || !Array.isArray(data) || data.length === 0) {
     throw new ControllerError("Invalid data received: Missing array", 400);
   }
 
-  const columns: Array<keyof User> = [];
+  const columns: Array<keyof Usuarios.Table> = [];
   data.forEach((user, index) => {
     if (!user || typeof user !== "object") {
       throw new ControllerError(
@@ -44,7 +44,12 @@ const users: Controller<true> = async (context) => {
     }
 
     userColumns.forEach((key) => {
-      if (key !== "name" && key !== "email" && key !== "password") {
+      if (
+        key !== "name" &&
+        key !== "email" &&
+        key !== "password" &&
+        key !== "cpf"
+      ) {
         throw new ControllerError(
           `Invalid data received: '${key.toUpperCase()}' cannot be set`,
           400
@@ -62,7 +67,12 @@ const users: Controller<true> = async (context) => {
     });
   });
 
-  await dbClient.upsert<Partial<User>>("users", columns, ["id", "email"], data);
+  await dbClient.upsert<Partial<Usuarios.Table>>(
+    "users",
+    columns,
+    ["id", "email"],
+    data
+  );
 
   return true;
 };

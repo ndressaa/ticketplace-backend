@@ -1,5 +1,5 @@
 import type { Controller } from "../types";
-import type { Show } from "../../tables/show";
+import type { Eventos } from "../../tables/eventos";
 
 import DBClient from "../../utils/DBClient";
 import ControllerError from "../ControllerError";
@@ -13,7 +13,7 @@ const shows: Controller<true> = async (context) => {
     throw new ControllerError("Invalid data received: Missing body", 400);
   }
 
-  const data = JSON.parse(body) as Array<Partial<Show>>;
+  const data = JSON.parse(body) as Array<Partial<Eventos.Table>>;
 
   if (!data || !Array.isArray(data) || data.length === 0) {
     throw new ControllerError("Invalid data received: Missing array", 400);
@@ -63,7 +63,7 @@ const shows: Controller<true> = async (context) => {
     return true;
   }
 
-  const columns: Array<keyof Show> = [];
+  const columns: Array<keyof Eventos.Table> = [];
   data.forEach((show, index) => {
     if (!show || typeof show !== "object") {
       throw new ControllerError(
@@ -72,7 +72,7 @@ const shows: Controller<true> = async (context) => {
       );
     }
 
-    const showColumns = Object.keys(show);
+    const showColumns = Object.keys(show) as Array<keyof Eventos.Table>;
     if (showColumns.length === 0) {
       throw new ControllerError(
         `Invalid data received: Missing show object on line ${index}`,
@@ -88,7 +88,14 @@ const shows: Controller<true> = async (context) => {
     }
 
     showColumns.forEach((key) => {
-      if (key !== "title" && key !== "description" && key !== "value") {
+      if (
+        key !== "title" &&
+        key !== "description" &&
+        key !== "id_empresa" &&
+        key !== "date" &&
+        key !== "event_type" &&
+        key !== "genre"
+      ) {
         throw new ControllerError(
           `Invalid data received: '${key.toUpperCase()}' cannot be set`,
           400
@@ -106,7 +113,7 @@ const shows: Controller<true> = async (context) => {
     });
   });
 
-  await dbClient.upsert<Partial<Show>>("shows", columns, ["id"], data);
+  await dbClient.upsert<Partial<Eventos.Table>>("shows", columns, ["id"], data);
 
   return true;
 };

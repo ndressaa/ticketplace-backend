@@ -1,19 +1,17 @@
-import type { User, RetornableUserColumns } from "../../tables/user";
-import type { DBColumns } from "../../tables/types";
 import type { Controller } from "../types";
 
-import { getRetornableUserColumns } from "../../tables/user";
+import { Usuarios } from "../../tables/usuarios";
 import DBClient from "../../utils/DBClient";
 import ControllerError from "../ControllerError";
 
-type UsersTable = DBColumns<User>;
-
 const dbClient = new DBClient();
 
-const users: Controller<Array<RetornableUserColumns>> = async (context) => {
+const usuarios: Controller<Array<Usuarios.RetornableColumns>> = async (
+  context
+) => {
   const { id, searchParams } = context;
 
-  let sql = "SELECT * FROM public.user WHERE 1 = 1";
+  let sql = "SELECT * FROM public.tb_usuarios WHERE 1 = 1";
   let params: string[] = [];
 
   let placeholderIndex = 1;
@@ -34,9 +32,9 @@ const users: Controller<Array<RetornableUserColumns>> = async (context) => {
     });
   }
 
-  const result = await dbClient.query<UsersTable>(sql, params);
+  const result = await dbClient.query<Usuarios.Table>(sql, params);
 
-  return getRetornableUserColumns(result);
+  return Usuarios.parseRetornableColumns(result);
 };
 
-export default users;
+export default usuarios;

@@ -11,11 +11,13 @@
 - [Usando a API](#usando-a-api)
   - [v1/newUser](#v1newuser)
   - [v1/login](#v1login)
-  - [v1/users/:id](#v1usersid)
+  - [v1/usuarios/:id](#v1usuariosid)
     - [Recuperando usuários](#recuperando-usuários)
     - [Atualizando os dados de um usuário](#atualizando-os-dados-de-um-usuário)
-  - [v1/shows/:id](#v1showsid)
-    - [Recuperando shows](#recuperando-shows)
+  - [v1/eventos/:id](#v1eventosid)
+    - [Recuperando eventos](#recuperando-eventos)
+      - [Pesquisa por parte do campo](#pesquisa-por-parte-do-campo)
+      - [Pesuisando por uma data específica ou dentro de um intervalo](#pesuisando-por-uma-data-específica-ou-dentro-de-um-intervalo)
     - [Atualizando os dados de um show](#atualizando-os-dados-de-um-show)
 
 ## Execução
@@ -134,7 +136,7 @@ curl -X GET \
 }
 ```
 
-### v1/users/:id
+### v1/usuarios/:id
 
 Esse endpoint manipula os dados dos usuários.  
 
@@ -148,7 +150,7 @@ Esse endpoint manipula os dados dos usuários.
 # Retorna todos os usuários
 curl -X GET \
   -H "Authorization: Bearer askdbnkasbcn232bdls==..." \
-  http://localhost:8080/v1/users
+  http://localhost:8080/v1/usuarios
 ```
 
 **Resposta esperada**:  
@@ -174,14 +176,14 @@ Para retornar um usuário específico, basta informar o ID no endpoint ou utiliz
 # Retorna o usuário com ID 1234
 curl -X GET \
   -H "Authorization: Bearer askdbnkasbcn232bdls==..." \
-  http://localhost:8080/v1/users/1234
+  http://localhost:8080/v1/usuarios/1234
 ```
 
 ```bash
 # Retorna o usuário com email informado
 curl -X GET \
   -H "Authorization: Bearer askdbnkasbcn232bdls==..." \
-  http://localhost:8080/v1/users/?email=joao@gmail.com
+  http://localhost:8080/v1/usuarios/?email=joao@gmail.com
 ```
 
 **NOTA**. Para essa requisição de busca apenas 1 item será retoranado no array caso o usuário seja encontrado.
@@ -194,7 +196,7 @@ curl -X POST \
   -H "Authorization: Bearer askdbnkasbcn232bdls==..." \
   -H "Content-Type: application/json" \
   -d '{"name":"João da Silva Melo"}' \
-  http://localhost:8080/v1/users/1234
+  http://localhost:8080/v1/usuarios/1234
 ```
 
 Nesse exemplo o nome do usuário teve o sobrenome atualizado.
@@ -207,19 +209,19 @@ Nesse exemplo o nome do usuário teve o sobrenome atualizado.
 { "status": "OK" }
 ```
 
-### v1/shows/:id
+### v1/eventos/:id
 
 *Métodos aceitos*: `GET`, `POST`  
 
 **NOTA**. Para esse endpoint é necessário o envio do token recebido em um dos processos anteriores pelo header `Authorization` to tipo `Bearer` conforme exemplos a seguir.
 
-#### Recuperando shows
+#### Recuperando eventos
 
 ```bash
-# Retorna todos os shows
+# Retorna todos os eventos
 curl -X GET \
   -H "Authorization: Bearer askdbnkasbcn232bdls==..." \
-  http://localhost:8080/v1/shows
+  http://localhost:8080/v1/eventos
 ```
 
 **Resposta esperada**:
@@ -244,25 +246,44 @@ Para retornar um show específico, basta informar o ID no endpoint ou utilizar a
 # Retorna o show com ID 1234
 curl -X GET \
   -H "Authorization: Bearer askdbnkasbcn232bdls==..." \
-  http://localhost:8080/v1/shows/1234
+  http://localhost:8080/v1/eventos/1234
 ```
 
 ```bash
 # Retorna o show com título informado
 curl -X GET \
   -H "Authorization: Bearer askdbnkasbcn232bdls==..." \ 
-  http://localhost:8080/v1/shows/?title=Orquesta%20Sinf%C3%B4nica%20de%20S%C3%A3o%20Paulo
+  http://localhost:8080/v1/eventos/?title=Orquesta%20Sinf%C3%B4nica%20de%20S%C3%A3o%20Paulo
 ```
 
 **NOTA**. Para essa requisição de busca apenas 1 item será retoranado no array caso o show seja encontrado.
 
-Nesse endpoint ainda é possível realizar a pesquisa por parte do descrição, utilizando a query `descriptionLike`, conforme exemplo:
+##### Pesquisa por parte do campo
+
+Nesse endpoint ainda é possível realizar a pesquisa por parte do descrição ou título utilizando a query `description-like` ou `title-like`, conforme exemplo:
 
 ```bash
-# Retorna os shows com descrição que contenha "Orquestra"
+# Retorna os eventos com descrição que contenha "Orquestra"
 curl -X GET \
   -H "Authorization: Bearer askdbnkasbcn232bdls==..." \
-  http://localhost:8080/v1/shows/?descriptionLike=Orquestra
+  http://localhost:8080/v1/eventos/?description-like=Orquestra
+```
+
+##### Pesuisando por uma data específica ou dentro de um intervalo
+
+É possível pesquisar por eventos que ocorreram em uma data específica ou dentro de um intervalo de datas utilizando as queries `date` ou `date-gt` e `date-lt`, conforme exemplo:
+
+```bash
+# Retorna os eventos que ocorrerão na data 2030-12-25
+curl -X GET \
+  -H "Authorization: Bearer askdbnkasbcn232bdls==..." \ 
+  http://localhost:8080/v1/eventos/?date=2030-12-25
+
+  
+# Retorna os eventos que ocorrerão entre as datas 2030-12-25 e 2030-12-31
+curl -X GET \
+  -H "Authorization: Bearer askdbnkasbcn232bdls==..." \ 
+  http://localhost:8080/v1/eventos/?date-gt=2030-12-25&date-lt=2030-12-31
 ```
 
 #### Atualizando os dados de um show
@@ -273,7 +294,7 @@ curl -X POST \
   -H "Authorization: Bearer askdbnkasbcn232bdls==..." \
   -H "Content-Type: application/json" \
   -d '{"value": 150.00}' \
-  http://localhost:8080/v1/shows/1234
+  http://localhost:8080/v1/eventos/1234
 ```
 
 Nesse exemplo o valor do show foi atualizado.

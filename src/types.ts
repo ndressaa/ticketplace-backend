@@ -57,4 +57,7 @@ export type IteratorArgs = [Context, (error?: Error) => Promise<void>];
  */
 export type Iterator = (...args: IteratorArgs) => Promise<void>;
 
+/**
+ * Generic single / multi row object or array
+ */
 export type ObjectReturnsArrayOrObject<T extends object> = T | Array<T>;
