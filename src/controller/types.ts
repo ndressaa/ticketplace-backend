@@ -1,6 +1,6 @@
 import type { IncomingHttpHeaders } from "http";
 
-import type { RetornableColumns } from "../tables/types";
+import type { RetornableColumns } from "../tables";
 import type { Usuarios } from "../tables/usuarios";
 export interface Token {
   /**
@@ -36,7 +36,7 @@ export type ReturnContent = Array<RetornableColumns> | ResponseObject;
 /**
  * Controller context
  */
-export type Context = {
+export type Context<T extends Array<any> | undefined> = {
   /**
    * The search params
    */
@@ -51,19 +51,22 @@ export type Context = {
    * If present, content must include only the object with the given id
    */
   id?: string;
-
-  /**
-   * Request body
-   */
-  body?: string;
-};
+} & (T extends Array<any>
+  ? {
+      /**
+       * Request body
+       */
+      body: T;
+    }
+  : {});
 
 /**
  * Controller function
  */
-export type Controller<T extends boolean | ReturnContent> = (
-  context: Context
-) => Promise<undefined | T>;
+export type Controller<
+  T extends boolean | ReturnContent,
+  B extends Array<any> | undefined = undefined
+> = (context: Context<B>) => Promise<undefined | T>;
 
 /**
  * Allowed controller names

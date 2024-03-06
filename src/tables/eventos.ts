@@ -1,8 +1,10 @@
-import type { ObjectReturnsArrayOrObject } from "../types";
-import type { TimestampColumns } from "./types";
+import type { TimestampColumns, TableDefinition } from "./types";
 
 export namespace Eventos {
-  export interface Table extends TimestampColumns {
+  /**
+   * This table relative columns
+   */
+  export interface TableType extends TimestampColumns {
     id: number;
     id_empresa: number;
     title: string;
@@ -12,26 +14,65 @@ export namespace Eventos {
     genre: Array<string>;
   }
 
-  export type RetornableColumns = Table;
+  /**
+   * Columns that can be returned
+   */
+  export type RetornableColumns = TableType;
 
   /**
-   * Get the columns that can be returned from the table
-   * @param rows
+   * Table definition
    */
-  export function parseRetornableColumns(rows: Table): RetornableColumns;
-  export function parseRetornableColumns(
-    rows: Array<Table>
-  ): Array<RetornableColumns>;
-  export function parseRetornableColumns(
-    rows: ObjectReturnsArrayOrObject<Table>
-  ): ObjectReturnsArrayOrObject<RetornableColumns> {
-    if (Array.isArray(rows)) {
-      /**
-       * @note keep this implementation to help future changes
-       */
-      return rows;
-    } else {
-      return rows;
-    }
-  }
+  export const tableDefinition: TableDefinition<TableType, RetornableColumns> =
+    {
+      name: "tb_eventos",
+      schema: "public",
+      alias: "eventos",
+      colummns: {
+        id: {
+          omit: false,
+          operators: ["eq"],
+          type: "number",
+        },
+        id_empresa: {
+          omit: false,
+          operators: ["eq"],
+          type: "number",
+        },
+        title: {
+          omit: false,
+          operators: ["eq", "like"],
+          type: "string",
+        },
+        description: {
+          omit: false,
+          operators: ["eq", "like"],
+          type: "string",
+        },
+        date: {
+          omit: false,
+          operators: ["eq", "gt", "lt"],
+          type: "string",
+        },
+        event_type: {
+          omit: false,
+          operators: ["eq"],
+          type: "array",
+        },
+        genre: {
+          omit: false,
+          operators: ["eq"],
+          type: "array",
+        },
+        created_at: {
+          omit: false,
+          operators: ["eq", "gt", "lt"],
+          type: "string",
+        },
+        updated_at: {
+          omit: false,
+          operators: ["eq", "gt", "lt"],
+          type: "string",
+        },
+      },
+    } as const;
 }

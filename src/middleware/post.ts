@@ -38,14 +38,26 @@ const post: Middleware = async (context) => {
     return;
   }
 
-  let body = "";
+  let data = "";
   req.on("data", (chunk) => {
-    body += chunk.toString();
+    data += chunk.toString();
   });
 
   req.on("end", async () => {
+    if (!data) {
+      res.raiseError(400, "Invalid data received: Missing body");
+      return;
+    }
+
+    const body = JSON.parse(data) as Array<any>;
+
+    if (!data || !Array.isArray(data) || data.length === 0) {
+      res.raiseError(400, "Invalid data received: Missing array");
+      return;
+    }
+
     try {
-      const controllerContext: Context = {
+      const controllerContext: Context<Array<any>> = {
         searchParams: req.searchParams,
         headers: req.headers,
         body,

@@ -1,34 +1,60 @@
-import type { ObjectReturnsArrayOrObject } from "../types";
-import type { TimestampColumns } from "./types";
+import type { TimestampColumns, TableDefinition } from "./types";
 
 export namespace Empresas {
-  export interface Table extends TimestampColumns {
+  /**
+   * This table relative columns
+   */
+  export interface TableType extends TimestampColumns {
     id: number;
     cnpj: string;
     name: string;
     email: string;
   }
 
-  export type RetornableColumns = Table;
+  /**
+   * Columns that can be returned
+   */
+  export type RetornableColumns = TableType;
 
   /**
-   * Get the columns that can be returned from the table
-   * @param rows
+   * Table definition
    */
-  export function parseRetornableColumns(rows: Table): RetornableColumns;
-  export function parseRetornableColumns(
-    rows: Array<Table>
-  ): Array<RetornableColumns>;
-  export function parseRetornableColumns(
-    rows: ObjectReturnsArrayOrObject<Table>
-  ): ObjectReturnsArrayOrObject<RetornableColumns> {
-    if (Array.isArray(rows)) {
-      /**
-       * @note keep this implementation to help future changes
-       */
-      return rows;
-    } else {
-      return rows;
-    }
-  }
+  export const tableDefinition: TableDefinition<TableType, RetornableColumns> =
+    {
+      name: "tb_empresas",
+      schema: "public",
+      alias: "empresas",
+      colummns: {
+        id: {
+          omit: false,
+          operators: ["eq"],
+          type: "number",
+        },
+        cnpj: {
+          omit: false,
+          operators: ["eq"],
+          type: "string",
+        },
+        name: {
+          omit: false,
+          operators: ["eq"],
+          type: "string",
+        },
+        email: {
+          omit: false,
+          operators: ["eq"],
+          type: "string",
+        },
+        created_at: {
+          omit: false,
+          operators: ["eq", "gt", "lt"],
+          type: "string",
+        },
+        updated_at: {
+          omit: false,
+          operators: ["eq", "gt", "lt"],
+          type: "string",
+        },
+      },
+    } as const;
 }

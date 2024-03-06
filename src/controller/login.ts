@@ -100,7 +100,7 @@ export const validateToken = async (context: Context): Promise<boolean> => {
       try {
         decodeToken(token);
 
-        const foundUser = await dbClient.query<Usuarios.Table>(
+        const foundUser = await dbClient.query<Usuarios.TableType>(
           `SELECT * FROM public.tb_usuarios WHERE "token" = $1`,
           [token]
         );
@@ -122,16 +122,21 @@ export const validateToken = async (context: Context): Promise<boolean> => {
  *
  * @param context
  */
-export const newUser: Controller<ResponseObject<Token>> = async (context) => {
+export const newUser: Controller<
+  ResponseObject<Token>,
+  Array<Partial<Usuarios.TableType>>
+> = async (context) => {
   const { body } = context;
 
-  if (!body) {
-    throw new ControllerError("Invalid data received: Missing body", 400);
+  if (body.length !== 1) {
+    throw new ControllerError(
+      `Invalid data received: Body length (${body.length})`,
+      400
+    );
   }
 
   try {
-    const data = JSON.parse(body) as Partial<Usuarios.Table>;
-    const { name, email, password } = data;
+    const { name, email, password } = body[0];
 
     if (!name || !email || !password) {
       throw new ControllerError(
@@ -147,7 +152,7 @@ export const newUser: Controller<ResponseObject<Token>> = async (context) => {
 
     console.debug({
       newUser: {
-        data,
+        body,
         hashedPassword,
         token,
       },
@@ -155,7 +160,7 @@ export const newUser: Controller<ResponseObject<Token>> = async (context) => {
 
     const dbTransaction = await dbClient.startTransaction();
 
-    const user = await dbClient.query<Usuarios.Table>(
+    const user = await dbClient.query<Usuarios.TableType>(
       `INSERT INTO public.tb_usuarios
         ("name", "email", "password", "token") 
       VALUES ($1, $2, $3, $3)
@@ -175,7 +180,18 @@ export const newUser: Controller<ResponseObject<Token>> = async (context) => {
 
     const payload: ResponseObject<Token> = {
       statusCode: 201,
-      content: { token, user: Usuarios.parseRetornableColumns(user[0]) },
+      content: {
+        token,
+        user: Object.entries(user[0]).reduce((acc, [col, value]) => {
+          if (
+            Usuarios.tableDefinition.colummns[col as keyof Usuarios.TableType]
+              ?.omit === false
+          ) {
+            acc[col as keyof Usuarios.RetornableColumns] = value as never;
+          }
+          return acc;
+        }, {} as Usuarios.RetornableColumns),
+      },
     };
 
     return payload;
@@ -209,7 +225,7 @@ export const login: Controller<ResponseObject<Token>> = async (context) => {
     const pass = decodedAuth[1];
     console.log(`email: ${email} pass: ${pass}`);
     if (email && pass) {
-      const foundUser = await dbClient.query<Usuarios.Table>(
+      const foundUser = await dbClient.query<Usuarios.TableType>(
         `SELECT * FROM public.tb_usuarios WHERE "email" = $1`,
         [email]
       );
@@ -257,7 +273,16 @@ export const login: Controller<ResponseObject<Token>> = async (context) => {
             statusCode: 201,
             content: {
               token,
-              user: Usuarios.parseRetornableColumns(foundUser[0]),
+              user: Object.entries(foundUser[0]).reduce((acc, [col, value]) => {
+                if (
+                  Usuarios.tableDefinition.colummns[
+                    col as keyof Usuarios.TableType
+                  ]?.omit === false
+                ) {
+                  acc[col as keyof Usuarios.RetornableColumns] = value as never;
+                }
+                return acc;
+              }, {} as Usuarios.RetornableColumns),
             },
           };
 

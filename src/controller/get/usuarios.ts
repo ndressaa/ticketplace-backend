@@ -3,38 +3,39 @@ import type { Controller } from "../types";
 import { Usuarios } from "../../tables/usuarios";
 import DBClient from "../../utils/DBClient";
 import ControllerError from "../ControllerError";
+import { parseUrlParams } from "../../utils/tools";
 
 const dbClient = new DBClient();
 
-const usuarios: Controller<Array<Usuarios.RetornableColumns>> = async (
+const controller: Controller<Array<Usuarios.RetornableColumns>> = async (
   context
 ) => {
   const { id, searchParams } = context;
 
-  let sql = "SELECT * FROM public.tb_usuarios WHERE 1 = 1";
-  let params: string[] = [];
-
-  let placeholderIndex = 1;
-  if (id) {
-    sql += ` AND id = $${placeholderIndex++}`;
-    params.push(id);
-  } else {
-    searchParams.forEach((value, key) => {
-      if (key === "email") {
-        sql += ` AND "email" = $${placeholderIndex++}`;
-        params.push(value);
-      } else if (key === "name") {
-        sql += ` AND "name" = $${placeholderIndex++}`;
-        params.push(value);
-      } else {
-        throw new ControllerError(`Invalid search parameter: ${key}`, 400);
-      }
-    });
+  if ("id" in searchParams) {
+    throw new ControllerError("invalid URL parameter: id", 400);
   }
 
-  const result = await dbClient.query<Usuarios.Table>(sql, params);
+  if (id) {
+    searchParams.set("id-eq", id);
+  }
 
-  return Usuarios.parseRetornableColumns(result);
+  try {
+    const { sql, params } = parseUrlParams(
+      Usuarios.tableDefinition,
+      searchParams
+    );
+    const result = await dbClient.query<Usuarios.TableType>(sql, params);
+
+    if (!result) {
+      throw new ControllerError("Not found", 404);
+    }
+
+    return result;
+  } catch (error) {
+    if (error instanceof ControllerError) throw error;
+    throw new ControllerError((error as Error).message, 400);
+  }
 };
 
-export default usuarios;
+export default controller;

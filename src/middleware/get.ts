@@ -36,7 +36,7 @@ const get: Middleware = async (context) => {
     return;
   }
 
-  const controllerContext: Context = {
+  const controllerContext: Context<undefined> = {
     searchParams: req.searchParams,
     headers: req.headers,
     id,

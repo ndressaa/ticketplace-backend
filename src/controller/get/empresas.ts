@@ -1,21 +1,13 @@
 import type { Controller } from "../types";
 
-import { Eventos } from "../../tables/eventos";
+import { Empresas } from "../../tables/empresas";
 import DBClient from "../../utils/DBClient";
 import ControllerError from "../ControllerError";
 import { parseUrlParams } from "../../utils/tools";
 
 const dbClient = new DBClient();
 
-function parseDate(date: string, fieldName: string): Date {
-  const parsed = new Date(date);
-  if (isNaN(parsed.getTime())) {
-    throw new ControllerError(`Invalid date format: ${fieldName}`, 400);
-  }
-  return parsed;
-}
-
-const controller: Controller<Array<Eventos.RetornableColumns>> = async (
+const controller: Controller<Array<Empresas.RetornableColumns>> = async (
   context
 ) => {
   const { id, searchParams } = context;
@@ -30,10 +22,10 @@ const controller: Controller<Array<Eventos.RetornableColumns>> = async (
 
   try {
     const { sql, params } = parseUrlParams(
-      Eventos.tableDefinition,
+      Empresas.tableDefinition,
       searchParams
     );
-    const result = await dbClient.query<Eventos.TableType>(sql, params);
+    const result = await dbClient.query<Empresas.TableType>(sql, params);
 
     if (!result) {
       throw new ControllerError("Not found", 404);

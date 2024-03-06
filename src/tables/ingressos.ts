@@ -1,50 +1,69 @@
-import type { ObjectReturnsArrayOrObject } from "../types";
-import type { TimestampColumns } from "./types";
+import type { TimestampColumns, TableDefinition } from "./types";
 
 export namespace Ingressos {
   /**
- * Table public.tb_ingressos as ingressos {
-  id bigint [pk, not null, increment]
-  type ticket_type [not null]
-  value float [not null]
-  id_evento bigint [not null, ref: > eventos.id]
-  created_at timestamptz [not null, default: `current_timestamp`]
-  updated_at timestamptz [not null, default: `current_timestamp`]
-}
- */
+   * List of ticket types
+   */
   export enum TicketType {
     standard = "standard",
     vip = "vip",
     premium = "premium",
   }
 
-  export interface Table extends TimestampColumns {
+  /**
+   * This table relative columns
+   */
+  export interface TableType extends TimestampColumns {
     id: number;
     ticket_type: TicketType;
     value: number;
     id_evento: number;
   }
 
-  export type RetornableColumns = Table;
+  /**
+   * Columns that can be returned
+   */
+  export type RetornableColumns = TableType;
 
   /**
-   * Get the columns that can be returned from the table
-   * @param rows
+   * Table definition
    */
-  export function parseRetornableColumns(rows: Table): RetornableColumns;
-  export function parseRetornableColumns(
-    rows: Array<Table>
-  ): Array<RetornableColumns>;
-  export function parseRetornableColumns(
-    rows: ObjectReturnsArrayOrObject<Table>
-  ): ObjectReturnsArrayOrObject<RetornableColumns> {
-    if (Array.isArray(rows)) {
-      /**
-       * @note keep this implementation to help future changes
-       */
-      return rows;
-    } else {
-      return rows;
-    }
-  }
+  export const tableDefinition: TableDefinition<TableType, RetornableColumns> =
+    {
+      name: "tb_ingressos",
+      schema: "public",
+      alias: "ingressos",
+      colummns: {
+        id: {
+          omit: false,
+          operators: ["eq"],
+          type: "number",
+        },
+        ticket_type: {
+          omit: false,
+          operators: ["eq"],
+          type: "string",
+        },
+        value: {
+          omit: false,
+          operators: ["eq"],
+          type: "number",
+        },
+        id_evento: {
+          omit: false,
+          operators: ["eq"],
+          type: "number",
+        },
+        created_at: {
+          omit: false,
+          operators: ["eq", "gt", "lt"],
+          type: "string",
+        },
+        updated_at: {
+          omit: false,
+          operators: ["eq", "gt", "lt"],
+          type: "string",
+        },
+      },
+    } as const;
 }

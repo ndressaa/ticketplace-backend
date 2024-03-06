@@ -1,36 +1,30 @@
-import type { Empresas } from "./empresas";
-import type { Usuarios } from "./usuarios";
-import type { Eventos } from "./eventos";
-import type { Ingressos } from "./ingressos";
-import type { Cartoes } from "./cartoes";
-import type { Carrinho } from "./carrinho";
+export type TableOperators = "eq" | "gt" | "lt" | "like";
 
-/**
- * Every table object
- */
-export type Tables =
-  | Empresas.Table
-  | Usuarios.Table
-  | Eventos.Table
-  | Ingressos.Table
-  | Cartoes.Table
-  | Carrinho.Table;
+export interface ColumnInfo<O, T> {
+  omit: O extends undefined
+    ? boolean
+    : O extends string | number | boolean | object | Array<any>
+    ? false
+    : true;
+  operators: Array<TableOperators>;
+  type: T extends number ? "number" : T extends Array<any> ? "array" : "string";
+}
 
-/**
- * Columns that can be returned\
- */
-export type RetornableColumns =
-  | Empresas.RetornableColumns
-  | Usuarios.RetornableColumns
-  | Eventos.RetornableColumns
-  | Ingressos.RetornableColumns
-  | Cartoes.RetornableColumns
-  | Carrinho.RetornableColumns;
+export type ColumnsDefinition<T extends object, R extends Partial<T>> = {
+  [K in keyof T]: ColumnInfo<R[K], T[K]>;
+};
+
+export interface TableDefinition<T extends object, R extends Partial<T>> {
+  name: string;
+  schema: string;
+  alias: string;
+  colummns: ColumnsDefinition<T, R>;
+}
 
 /**
  * Database content object
  */
 export interface TimestampColumns {
-  createdAt: string;
-  updatedAt: string;
+  created_at: string;
+  updated_at: string;
 }

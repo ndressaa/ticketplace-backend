@@ -144,20 +144,18 @@ class DBClient {
     table: string,
     columns: Array<keyof T>,
     conflictColumns: Array<keyof T>,
-    values: Array<T>,
+    values: Array<Array<any>>,
     transaction?: PoolClient
   ): Promise<void> {
     const client = transaction || (await this.connect());
     try {
+      let placeholder = 1;
       const cols = `"${columns.join('", "')}"`;
       const insertValues = values
         .map(
-          (cols) =>
-            `($${Object.values(cols)
-              .map((_, i) => i + 1)
-              .join(", $")})`
+          (line) => `(${line.map((_col) => `$${placeholder++}`).join(", ")})`
         )
-        .join(`,\n`);
+        .join(", ");
       const updateValues = columns
         .map((c) => `${c.toString()} = EXCLUDED.${c.toString()}`)
         .join(", ");
@@ -170,7 +168,7 @@ class DBClient {
           ("${conflictColumns.join('", "')}")
           DO UPDATE SET ${updateValues};
       `;
-      await client.query(query, values);
+      await client.query(query, values.flat());
     } catch (err) {
       throw err;
     } finally {
