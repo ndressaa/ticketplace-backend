@@ -1,6 +1,6 @@
 import type { Controller } from "../types";
 
-import { Cartoes } from "../../tables/cartoes";
+import { Cartoes } from "../../tables";
 import DBClient from "../../utils/DBClient";
 import ControllerError from "../ControllerError";
 import { parseUrlParams } from "../../utils/tools";

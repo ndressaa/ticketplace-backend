@@ -1,28 +1,29 @@
 import type { Controller } from "../types";
 
-import { Usuarios } from "../../tables";
+import { Ingressos } from "../../tables";
 import DBClient from "../../utils/DBClient";
 import ControllerError from "../ControllerError";
 import { parsePostRequest } from "../../utils/tools";
 
 const dbClient = new DBClient();
 
-const controller: Controller<true, Array<Partial<Usuarios.TableType>>> = async (
-  context
-) => {
+const controller: Controller<
+  true,
+  Array<Partial<Ingressos.TableType>>
+> = async (context) => {
   const { id, searchParams, body } = context;
 
   try {
     const { columns, values } = parsePostRequest(
       body,
-      Usuarios.tableDefinition,
-      ["name", "email", "password", "cpf"]
+      Ingressos.tableDefinition,
+      ["id", "ticket_type", "value", "id_evento"]
     );
 
-    await dbClient.upsert<Partial<Usuarios.TableType>>(
-      Usuarios.tableDefinition.name,
+    await dbClient.upsert<Partial<Ingressos.TableType>>(
+      Ingressos.tableDefinition.name,
       columns,
-      ["id", "email"],
+      ["id"],
       values
     );
   } catch (error) {

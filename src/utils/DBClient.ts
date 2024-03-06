@@ -148,6 +148,8 @@ class DBClient {
     transaction?: PoolClient
   ): Promise<void> {
     const client = transaction || (await this.connect());
+
+    let query = "UNKNOWN QUERY";
     try {
       let placeholder = 1;
       const cols = `"${columns.join('", "')}"`;
@@ -159,7 +161,7 @@ class DBClient {
       const updateValues = columns
         .map((c) => `${c.toString()} = EXCLUDED.${c.toString()}`)
         .join(", ");
-      const query = `
+      query = `
         INSERT INTO public.${table}
           (${cols})
         VALUES
@@ -170,6 +172,12 @@ class DBClient {
       `;
       await client.query(query, values.flat());
     } catch (err) {
+      console.error({
+        message: "Error while running `upsert()`",
+        query,
+        values,
+        error: err,
+      });
       throw err;
     } finally {
       if (!transaction) client.release();

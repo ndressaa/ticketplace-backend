@@ -15,10 +15,32 @@ export type ColumnsDefinition<T extends object, R extends Partial<T>> = {
 };
 
 export interface TableDefinition<T extends object, R extends Partial<T>> {
+  /**
+   * The table name
+   */
   name: string;
+
+  /**
+   * The schema name
+   */
   schema: string;
+
+  /**
+   * The table alias
+   */
   alias: string;
+
+  /**
+   * The table columns
+   */
   colummns: ColumnsDefinition<T, R>;
+
+  /**
+   * The columns to be indexed by
+   *
+   * @note List columns that could be indexed (selectable on critical queries like DELETE)
+   */
+  indexBy: Array<keyof T>;
 }
 
 /**

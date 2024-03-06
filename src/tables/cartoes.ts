@@ -26,6 +26,7 @@ export namespace Cartoes {
       name: "tb_cartoes_de_banco",
       schema: "public",
       alias: "cartoes",
+      indexBy: ["id", "id_usuario"],
       colummns: {
         id: {
           omit: false,

@@ -1,5 +1,7 @@
 import { TableDefinition, ColumnInfo, TableOperators } from "../tables/types";
 
+type GenericObject = Record<string, any>;
+
 /**
  * Parse URL parameters and return a SQL query and its parameters
  *
@@ -8,11 +10,9 @@ import { TableDefinition, ColumnInfo, TableOperators } from "../tables/types";
  * @param sql
  * @returns
  */
-function parseUrlParams<T extends TableDefinition<object, object>>(
-  tableDefinition: T,
-  searchParams: URLSearchParams,
-  sql?: string
-) {
+function parseUrlParams<
+  T extends TableDefinition<GenericObject, GenericObject>
+>(tableDefinition: T, searchParams: URLSearchParams, sql?: string) {
   let params: Array<string | Date | number> = [];
   let placeholderIndex = 1;
 
@@ -107,7 +107,7 @@ function parseUrlParams<T extends TableDefinition<object, object>>(
     sql += ` AND ${
       tableDefinition.alias
     }."${columnName}" @> $${placeholderIndex++}`;
-    params.push(values as (typeof params)[number]);
+    params.push(values as never);
   });
 
   return { sql, params };
@@ -120,7 +120,9 @@ function parseUrlParams<T extends TableDefinition<object, object>>(
  * @param tableDefinition
  * @param acceptedColumns
  */
-function parsePostRequest<T extends TableDefinition<object, object>>(
+function parsePostRequest<
+  T extends TableDefinition<GenericObject, GenericObject>
+>(
   body: Array<any>,
   tableDefinition: T,
   acceptedColumns: Array<keyof T["colummns"]>

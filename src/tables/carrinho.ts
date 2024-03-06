@@ -34,6 +34,7 @@ export namespace Carrinho {
       name: "tb_carrinho",
       schema: "public",
       alias: "carrinho",
+      indexBy: ["id_usuario", "id_ingresso"],
       colummns: {
         id_usuario: {
           omit: false,

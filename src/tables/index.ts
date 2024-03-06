@@ -1,9 +1,9 @@
-import type { Empresas } from "./empresas";
-import type { Usuarios } from "./usuarios";
-import type { Eventos } from "./eventos";
-import type { Ingressos } from "./ingressos";
-import type { Cartoes } from "./cartoes";
-import type { Carrinho } from "./carrinho";
+import { Empresas } from "./empresas";
+import { Usuarios } from "./usuarios";
+import { Eventos } from "./eventos";
+import { Ingressos } from "./ingressos";
+import { Cartoes } from "./cartoes";
+import { Carrinho } from "./carrinho";
 
 /**
  * Every table object

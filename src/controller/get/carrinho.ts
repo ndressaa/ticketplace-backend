@@ -1,6 +1,6 @@
 import type { Controller } from "../types";
 
-import { Carrinho } from "../../tables/carrinho";
+import { Carrinho } from "../../tables";
 import DBClient from "../../utils/DBClient";
 import ControllerError from "../ControllerError";
 import { parseUrlParams } from "../../utils/tools";

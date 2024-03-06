@@ -1,12 +1,12 @@
 import type { Middleware } from "./types";
-import type { ControllerName } from "../controller/types";
+import type { Endpoints } from "../controller/types";
 import type { Context } from "../controller/types";
 
 import controllers from "../controller/get";
 import ControllerError from "../controller/ControllerError";
 import { validateToken } from "../controller/login";
 
-const get: Middleware = async (context) => {
+const middleware: Middleware = async (context) => {
   const { request: req, response: res } = context;
 
   const urlParts = req.url.split("/");
@@ -14,7 +14,7 @@ const get: Middleware = async (context) => {
   const [, version, path, id] = urlParts as [
     string,
     string | undefined,
-    ControllerName | undefined,
+    Endpoints | undefined,
     string | undefined
   ];
 
@@ -26,7 +26,11 @@ const get: Middleware = async (context) => {
   // Performs authentication
   if (path !== "login") {
     const isTokenValid = await validateToken(context);
-    if (!isTokenValid) return;
+
+    if (!isTokenValid) {
+      res.raiseError(401, "Unauthorized");
+      return;
+    }
   }
 
   const controller = controllers[path as keyof typeof controllers];
@@ -75,4 +79,4 @@ const get: Middleware = async (context) => {
   }
 };
 
-export default get;
+export default middleware;

@@ -26,6 +26,7 @@ export namespace Usuarios {
       name: "tb_usuarios",
       schema: "public",
       alias: "usuarios",
+      indexBy: ["id", "email", "cpf"],
       colummns: {
         id: {
           omit: false,

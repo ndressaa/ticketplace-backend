@@ -24,6 +24,7 @@ export namespace Empresas {
       name: "tb_empresas",
       schema: "public",
       alias: "empresas",
+      indexBy: ["id", "cnpj"],
       colummns: {
         id: {
           omit: false,

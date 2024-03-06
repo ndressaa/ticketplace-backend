@@ -27,6 +27,7 @@ export namespace Eventos {
       name: "tb_eventos",
       schema: "public",
       alias: "eventos",
+      indexBy: ["id", "id_empresa"],
       colummns: {
         id: {
           omit: false,

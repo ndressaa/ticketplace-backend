@@ -33,6 +33,7 @@ export namespace Ingressos {
       name: "tb_ingressos",
       schema: "public",
       alias: "ingressos",
+      indexBy: ["id", "id_evento"],
       colummns: {
         id: {
           omit: false,

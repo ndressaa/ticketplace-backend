@@ -1,6 +1,6 @@
 import type { Controller } from "../types";
 
-import { Eventos } from "../../tables/eventos";
+import { Eventos } from "../../tables";
 import DBClient from "../../utils/DBClient";
 import ControllerError from "../ControllerError";
 import { parsePostRequest } from "../../utils/tools";

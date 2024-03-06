@@ -1,13 +1,13 @@
 import type { Controller } from "../types";
 
-import { Usuarios } from "../../tables";
+import { Cartoes } from "../../tables";
 import DBClient from "../../utils/DBClient";
 import ControllerError from "../ControllerError";
 import { parsePostRequest } from "../../utils/tools";
 
 const dbClient = new DBClient();
 
-const controller: Controller<true, Array<Partial<Usuarios.TableType>>> = async (
+const controller: Controller<true, Array<Partial<Cartoes.TableType>>> = async (
   context
 ) => {
   const { id, searchParams, body } = context;
@@ -15,14 +15,22 @@ const controller: Controller<true, Array<Partial<Usuarios.TableType>>> = async (
   try {
     const { columns, values } = parsePostRequest(
       body,
-      Usuarios.tableDefinition,
-      ["name", "email", "password", "cpf"]
+      Cartoes.tableDefinition,
+      [
+        "id",
+        "id_usuario",
+        "nome_cartao",
+        "numero_cartao",
+        "cpf_titular",
+        "data_expiracao",
+        "codigo_seguranca",
+      ]
     );
 
-    await dbClient.upsert<Partial<Usuarios.TableType>>(
-      Usuarios.tableDefinition.name,
+    await dbClient.upsert<Partial<Cartoes.TableType>>(
+      Cartoes.tableDefinition.name,
       columns,
-      ["id", "email"],
+      ["id"],
       values
     );
   } catch (error) {

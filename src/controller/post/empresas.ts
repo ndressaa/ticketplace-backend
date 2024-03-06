@@ -1,13 +1,13 @@
 import type { Controller } from "../types";
 
-import { Usuarios } from "../../tables";
+import { Empresas } from "../../tables";
 import DBClient from "../../utils/DBClient";
 import ControllerError from "../ControllerError";
 import { parsePostRequest } from "../../utils/tools";
 
 const dbClient = new DBClient();
 
-const controller: Controller<true, Array<Partial<Usuarios.TableType>>> = async (
+const controller: Controller<true, Array<Partial<Empresas.TableType>>> = async (
   context
 ) => {
   const { id, searchParams, body } = context;
@@ -15,14 +15,14 @@ const controller: Controller<true, Array<Partial<Usuarios.TableType>>> = async (
   try {
     const { columns, values } = parsePostRequest(
       body,
-      Usuarios.tableDefinition,
-      ["name", "email", "password", "cpf"]
+      Empresas.tableDefinition,
+      ["id", "cnpj", "name", "email"]
     );
 
-    await dbClient.upsert<Partial<Usuarios.TableType>>(
-      Usuarios.tableDefinition.name,
+    await dbClient.upsert<Partial<Empresas.TableType>>(
+      Empresas.tableDefinition.name,
       columns,
-      ["id", "email"],
+      ["id"],
       values
     );
   } catch (error) {

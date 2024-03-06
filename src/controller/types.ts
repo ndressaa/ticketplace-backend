@@ -69,6 +69,21 @@ export type Controller<
 > = (context: Context<B>) => Promise<undefined | T>;
 
 /**
- * Allowed controller names
+ * Enpoints (controller names)
  */
-export type ControllerName = "login" | "newUser" | "users" | "shows";
+export type Endpoints =
+  /**
+   * Manual endpoints (no table direct reference)
+   */
+  | "login"
+  | "newUser"
+
+  /**
+   * Table endpoints
+   */
+  | "eventos"
+  | "carrinho"
+  | "cartoes"
+  | "empresas"
+  | "ingressos"
+  | "usuarios";

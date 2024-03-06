@@ -1,6 +1,6 @@
 import type { Controller } from "../types";
 
-import { Usuarios } from "../../tables/usuarios";
+import { Usuarios } from "../../tables";
 import DBClient from "../../utils/DBClient";
 import ControllerError from "../ControllerError";
 import { parseUrlParams } from "../../utils/tools";
