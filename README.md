@@ -5,21 +5,17 @@
 - [Execução](#execução)
   - [Apenas a aplicação](#apenas-a-aplicação)
   - [Utilizando Docker](#utilizando-docker)
-    - [Usando o Docker compose](#usando-o-docker-compose)
-    - [Usando o Dockerfile (não recomendado)](#usando-o-dockerfile-não-recomendado)
 - [Desenvolvimento](#desenvolvimento)
 - [Usando a API](#usando-a-api)
   - [v1/newUser](#v1newuser)
   - [v1/login](#v1login)
-  - [v1/usuarios/:id](#v1usuariosid)
-    - [Recuperando usuários](#recuperando-usuários)
-    - [Atualizando os dados de um usuário](#atualizando-os-dados-de-um-usuário)
-  - [v1/eventos/:id](#v1eventosid)
-    - [Recuperando eventos](#recuperando-eventos)
-      - [Pesquisa por parte do campo](#pesquisa-por-parte-do-campo)
-      - [Pesuisando por uma data específica ou dentro de um intervalo](#pesuisando-por-uma-data-específica-ou-dentro-de-um-intervalo)
-    - [Atualizando os dados de um show](#atualizando-os-dados-de-um-show)
-
+  - [Exemplos e casos de uso](#exemplos-e-casos-de-uso)
+    - [Recuperando todos os registros de uma tabela](#recuperando-todos-os-registros-de-uma-tabela)
+    - [Recuperando um registro específico](#recuperando-um-registro-específico)
+    - [Recuperando registros que contenham uma palavra ou frase](#recuperando-registros-que-contenham-uma-palavra-ou-frase)
+    - [Pesuisando por um valor específica ou dentro de um intervalo](#pesuisando-por-um-valor-específica-ou-dentro-de-um-intervalo)
+    - [Inserindo e Atualizando as informações de um registro](#inserindo-e-atualizando-as-informações-de-um-registro)
+  
 ## Execução
 
 ### Apenas a aplicação
@@ -35,17 +31,9 @@ npm start
 
 Nesse exemplo é preciso ter o `docker` e `docker-compose` instalados na máquina.
 
-#### Usando o Docker compose
-
 ```bash
+docker build . -t ticketplace-backend
 docker compose up
-```
-
-#### Usando o Dockerfile (não recomendado)
-
-```bash
-docker build -t ticketplace-backend .
-docker run -p 8080:8080 ticketplace-backend
 ```
 
 ## Desenvolvimento
@@ -64,16 +52,45 @@ npm install
 A utilização da api consiste no interação com endpoints.  
 Todos os endpoints precisam ser chamados utilizando o seguinte padrão:  
 
-`[METHOD] http://127.0.0.1:8080/v1/{{path}}/{{:id}}/`  
+`[METHOD] http://127.0.0.1:8080/v1/{{endpoint}}/{{:id}}/?{{query}}-{{operador}}={{valor}}`  
 
 Onde:
 
-- `path` Indica basicamente a função ou método a ser executado
+- `endpoint` Indica a função ou tabela a ser acessada
 - `id` Quando fornecido indica um ID para qual aquela ação deverá ser tomada
+- `query` Indica um filtro para a busca
+- `operador` Indica o operador a ser utilizado na busca
+  - `like` Indica que a busca será por parte do campo
+  - `gt` Indica que a busca será por valores maiores que o informado
+  - `lt` Indica que a busca será por valores menores que o informado
+  - `eq` Indica que a busca será por valores iguais ao informado  
+  **NOTA**. O operador `eq` é o padrão, ou seja, caso não seja informado será utilizado esse operador
+- `valor` Indica o valor a ser buscado
 
-**NOTA**. O conteúdo esperado de um requisição (`input`/`output`) de cada enpoint pode variar, conforme a implementação do banco de dados, dessa forma seguir documentação dele para maiores detalhes.
+**NOTA**. Os campos `id` e `query` são opcionais, ou seja, não é necessário informar um `id` ou `query` para que a requisição seja feita.
+
+**NOTA**. As queries podem se repetir, ou seja, é possível informar a mesma query mais de uma vez, por exemplo `?query=valor1&query=valor2`. Nesse caso a busca será feita por todos os valores informados somente para uma coluna do tipo `ARRAY`, caso contrário será considerado apenas o primeiro valor informado.
+
+**NOTA**. O conteúdo esperado de um requisição (`input`/`output`) de cada enpoint pode variar, conforme a implementação do banco de dados, dessa forma seguir [documentação dele](https://github.com/ndressaa/ticketplace-database/blob/main/schema.dbml) para maiores detalhes.
 
 A seguir são listados os endpoints possíveis.
+
+- [`newUser`](#v1newuser)
+- [`login`](#v1login)
+- `usuarios`
+- `eventos`
+- `empresas`
+- `carrinho`
+- `cartoes`
+
+**NOTA**. Com exceção dos endpoints `newUser` e `login`, é necessário o envio do token recebido no processo de `login` ou `criação de usuário` pelo header `Authorization` to tipo `Bearer` conforme exemplos a seguir.
+
+```bash
+# Retorna todos os usuários
+curl -X GET \
+  -H "Authorization: Bearer askdbnkasbcn232bdls==..." \
+  http://localhost:8080/v1/usuarios
+```
 
 ### v1/newUser
 
@@ -87,7 +104,7 @@ Nota. Como essa API é uma demonstração e a fim de possibilitar a utilização
 ```bash
 curl -X POST \
   -H "Content-Type: application/json" \
-  -d '{"name":"João da Silva", "email":"joao@gmail.com", "password":"Joao@10"}' \
+  -d '[{"name":"João da Silva", "cpf": 123, "email":"joao@gmail.com", "password":"Joao@10"}]' \
   http://localhost:8080/v1/newUser
 ```
 
@@ -136,15 +153,11 @@ curl -X GET \
 }
 ```
 
-### v1/usuarios/:id
+### Exemplos e casos de uso
 
-Esse endpoint manipula os dados dos usuários.  
+#### Recuperando todos os registros de uma tabela
 
-**Métodos aceitos**: `GET`, `POST`  
-
-**NOTA**. Para esse endpoint é necessário o envio do token recebido em um dos processos anteriores pelo header `Authorization` to tipo `Bearer` conforme exemplos a seguir.
-
-#### Recuperando usuários
+Para recuperar todos os registros de uma tabela basta fazer uma requisição `GET` para o endpoint desejado sem informar um `id` ou `query`, conforme exemplo:
 
 ```bash
 # Retorna todos os usuários
@@ -153,24 +166,9 @@ curl -X GET \
   http://localhost:8080/v1/usuarios
 ```
 
-**Resposta esperada**:  
+#### Recuperando um registro específico
 
-`HTTP 200`
-
-```json
-[
-  { 
-    "id": 1234,
-    "name": "João da Silva",
-    "email":"joao@gmail.com",
-    "createdAt": "DATA DE CRIAÇÃO",
-    "updatedAt": "DATA DE ATUALIZAÇÃO",
-  },
-  ...
-]
-```
-
-Para retornar um usuário específico, basta informar o ID no endpoint ou utilizar as queries conforme exemplos:
+Para recuperar um registro específico de uma tabela basta fazer uma requisição `GET` para o endpoint desejado informando o `id` do registro desejado, conforme exemplo:
 
 ```bash
 # Retorna o usuário com ID 1234
@@ -179,122 +177,85 @@ curl -X GET \
   http://localhost:8080/v1/usuarios/1234
 ```
 
+Ainda é possível realizar a pesquisa informando um valor desejado para a coluna, conforme exemplo:
+
 ```bash
-# Retorna o usuário com email informado
+# Retorna todos os itens do carrinho para um usuário com ID 1234
 curl -X GET \
   -H "Authorization: Bearer askdbnkasbcn232bdls==..." \
-  http://localhost:8080/v1/usuarios/?email=joao@gmail.com
+  http://localhost:8080/v1/carrinho/?id_usuario=1234
 ```
 
-**NOTA**. Para essa requisição de busca apenas 1 item será retoranado no array caso o usuário seja encontrado.
+#### Recuperando registros que contenham uma palavra ou frase
 
-#### Atualizando os dados de um usuário
+É possível realizar a pesquisa por parte do campo utilizando a query com o operador `like`, conforme exemplo:
 
 ```bash
-# Atualiza o nome do usuário com ID 1234
-curl -X POST \
-  -H "Authorization: Bearer askdbnkasbcn232bdls==..." \
-  -H "Content-Type: application/json" \
-  -d '{"name":"João da Silva Melo"}' \
-  http://localhost:8080/v1/usuarios/1234
-```
-
-Nesse exemplo o nome do usuário teve o sobrenome atualizado.
-
-**Resposta esperada**:  
-
-`HTTP 200`
-
-```json
-{ "status": "OK" }
-```
-
-### v1/eventos/:id
-
-*Métodos aceitos*: `GET`, `POST`  
-
-**NOTA**. Para esse endpoint é necessário o envio do token recebido em um dos processos anteriores pelo header `Authorization` to tipo `Bearer` conforme exemplos a seguir.
-
-#### Recuperando eventos
-
-```bash
-# Retorna todos os eventos
+# Retorna os eventos com título que contenha "rock"
 curl -X GET \
   -H "Authorization: Bearer askdbnkasbcn232bdls==..." \
-  http://localhost:8080/v1/eventos
+  http://localhost:8080/v1/usuarios/?titulo-like=rock
 ```
 
-**Resposta esperada**:
+#### Pesuisando por um valor específica ou dentro de um intervalo
 
-`HTTP 200`
-
-```json
-[
-  { 
-    "id": 1234,
-    "title": "Orquesta Sinfônica de São Paulo",
-    "description": "Orquestra sinfônica de São Paulo",
-    "value": 100.00,
-  },
-  ...
-]
-```
-
-Para retornar um show específico, basta informar o ID no endpoint ou utilizar as queries conforme exemplos:
-
-```bash
-# Retorna o show com ID 1234
-curl -X GET \
-  -H "Authorization: Bearer askdbnkasbcn232bdls==..." \
-  http://localhost:8080/v1/eventos/1234
-```
-
-```bash
-# Retorna o show com título informado
-curl -X GET \
-  -H "Authorization: Bearer askdbnkasbcn232bdls==..." \ 
-  http://localhost:8080/v1/eventos/?title=Orquesta%20Sinf%C3%B4nica%20de%20S%C3%A3o%20Paulo
-```
-
-**NOTA**. Para essa requisição de busca apenas 1 item será retoranado no array caso o show seja encontrado.
-
-##### Pesquisa por parte do campo
-
-Nesse endpoint ainda é possível realizar a pesquisa por parte do descrição ou título utilizando a query `description-like` ou `title-like`, conforme exemplo:
-
-```bash
-# Retorna os eventos com descrição que contenha "Orquestra"
-curl -X GET \
-  -H "Authorization: Bearer askdbnkasbcn232bdls==..." \
-  http://localhost:8080/v1/eventos/?description-like=Orquestra
-```
-
-##### Pesuisando por uma data específica ou dentro de um intervalo
-
-É possível pesquisar por eventos que ocorreram em uma data específica ou dentro de um intervalo de datas utilizando as queries `date` ou `date-gt` e `date-lt`, conforme exemplo:
+É possível pesquisar por datas, e valores numéricos específicos ou dentro de um intervalo utilizando os operadores `eq`, `gt` e `lt`, conforme exemplo:
 
 ```bash
 # Retorna os eventos que ocorrerão na data 2030-12-25
 curl -X GET \
   -H "Authorization: Bearer askdbnkasbcn232bdls==..." \ 
-  http://localhost:8080/v1/eventos/?date=2030-12-25
+  http://localhost:8080/v1/eventos/?data-eq=2030-12-25
 
   
 # Retorna os eventos que ocorrerão entre as datas 2030-12-25 e 2030-12-31
 curl -X GET \
   -H "Authorization: Bearer askdbnkasbcn232bdls==..." \ 
-  http://localhost:8080/v1/eventos/?date-gt=2030-12-25&date-lt=2030-12-31
+  http://localhost:8080/v1/eventos/?data-gt=2030-12-25&data-lt=2030-12-31
+
+# Retorna os ingressos com valor igual a 150.00
+curl -X GET \
+  -H "Authorization: Bearer askdbnkasbcn232bdls==..." \ 
+  http://localhost:8080/v1/eventos/?valor-eq=150.00
+
+# Retorna os ingressos com valor menor que 150.00
+curl -X GET \
+  -H "Authorization: Bearer askdbnkasbcn232bdls==..." \
+  http://localhost:8080/v1/eventos/?valor-lt=150.00
 ```
 
-#### Atualizando os dados de um show
+#### Inserindo e Atualizando as informações de um registro
+
+Para inserir ou atualizar as informações de um registro basta fazer uma requisição `POST` para o endpoint desejado informando o `id` do registro desejado ou a query da coluna que deseja atualizar, conforme exemplo:
+
+**IMPORTANTE**. Para utilizar o método `POST` é necessário *SEMPRE* passar todos os itens como um `array`, mesmo que seja apenas um item.
 
 ```bash
-# Atualiza o valor do show com ID 1234
+# Atualiza o valor do evento com ID 1234
 curl -X POST \
   -H "Authorization: Bearer askdbnkasbcn232bdls==..." \
   -H "Content-Type: application/json" \
-  -d '{"value": 150.00}' \
+  -d '[{"value": 150.00}]' \
   http://localhost:8080/v1/eventos/1234
+
+# Insere um par de ingressos no carrinho do usuário com ID 1234
+curl -X POST
+  -H "Authorization: Bearer askdbnkasbcn232bdls==..." \
+  -H "Content-Type: application/json" \
+  -d '[{"id_usuario": 1234, "id_ingresso": 5678}, {"id_usuario": 1234, "id_ingresso": 5678}]' \
+  http://localhost:8080/v1/carrinho
+
+
+# Atualiza o nome de um cartão com numero 1234567890
+curl -X POST
+  -H "Authorization: Bearer askdbnkasbcn232bdls==..." \
+  -H "Content-Type: application/json" \
+  -d '[{"nome_cartao": "Cartão do João"}]' \
+  http://localhost:8080/v1/cartoes/?numero_cartao-eq=1234567890
 ```
 
 Nesse exemplo o valor do show foi atualizado.
+
+#### Deletando um registro
+
+Esse método ainda está em desenvolvimento e não está disponível para uso.

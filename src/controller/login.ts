@@ -13,26 +13,26 @@ const dbClient = new DBClient();
 const tokenExpiration = 60 * 60 * 24; // 24 hours
 
 /**
- * Hash the password
+ * Hash the senha
  *
- * @param password
+ * @param senha
  * @returns
  */
-async function hashPassword(password: string) {
+async function hashPassword(senha: string) {
   const salt = await genSalt(10);
-  const hashPassword = await hash(password, salt);
+  const hashPassword = await hash(senha, salt);
   return hashPassword;
 }
 
 /**
- * Compare given password with the hash
+ * Compare given senha with the hash
  *
- * @param password
+ * @param senha
  * @param hash
  * @returns
  */
-async function comparePasswords(password: string, hash: string) {
-  return await compare(password, hash);
+async function comparePasswords(senha: string, hash: string) {
+  return await compare(senha, hash);
 }
 
 /**
@@ -127,7 +127,6 @@ export const newUser: Controller<
   Array<Partial<Usuarios.TableType>>
 > = async (context) => {
   const { body } = context;
-
   if (body.length !== 1) {
     throw new ControllerError(
       `Invalid data received: Body length (${body.length})`,
@@ -136,18 +135,18 @@ export const newUser: Controller<
   }
 
   try {
-    const { name, email, password } = body[0];
+    const { nome, email, senha, cpf } = body[0];
 
-    if (!name || !email || !password) {
+    if (!nome || !email || !senha || !cpf) {
       throw new ControllerError(
         `Invalid data received: Missing ${
-          !name ? "name" : !email ? "email" : "password"
+          !nome ? "nome" : !email ? "email" : !senha ? "senha" : "cpf"
         }`,
         400
       );
     }
 
-    const hashedPassword = await hashPassword(password);
+    const hashedPassword = await hashPassword(senha);
     const token = getToken();
 
     console.debug({
@@ -162,10 +161,10 @@ export const newUser: Controller<
 
     const user = await dbClient.query<Usuarios.TableType>(
       `INSERT INTO public.tb_usuarios
-        ("name", "email", "password", "token") 
-      VALUES ($1, $2, $3, $3)
+        ("nome", "email", "cpf", "senha", "token") 
+      VALUES ($1, $2, $3, $4, $5)
       RETURNING *`,
-      [name, email, hashedPassword, token],
+      [nome, email, cpf, hashedPassword, token],
       dbTransaction
     );
 
@@ -246,13 +245,13 @@ export const login: Controller<ResponseObject<Token>> = async (context) => {
       }
 
       if (foundUser.length !== 0) {
-        const { password } = foundUser[0];
-        const isPasswordValid = await comparePasswords(pass, password);
+        const { senha } = foundUser[0];
+        const isPasswordValid = await comparePasswords(pass, senha);
         console.debug({
           login: {
             passwordCompare: {
               receivedPassword: pass,
-              dbPassword: password,
+              dbPassword: senha,
               valid: isPasswordValid,
             },
           },

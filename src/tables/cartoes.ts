@@ -23,7 +23,7 @@ export namespace Cartoes {
 
   export const tableDefinition: TableDefinition<TableType, RetornableColumns> =
     {
-      name: "tb_cartoes_de_banco",
+      name: "tb_dados_cartao",
       schema: "public",
       alias: "cartoes",
       indexBy: ["id", "id_usuario"],
@@ -63,12 +63,12 @@ export namespace Cartoes {
           operators: ["eq"],
           type: "number",
         },
-        created_at: {
+        criado_data: {
           omit: false,
           operators: ["eq", "gt", "lt"],
           type: "string",
         },
-        updated_at: {
+        atualizado_data: {
           omit: false,
           operators: ["eq", "gt", "lt"],
           type: "string",

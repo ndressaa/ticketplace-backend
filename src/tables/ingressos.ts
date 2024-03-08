@@ -15,8 +15,8 @@ export namespace Ingressos {
    */
   export interface TableType extends TimestampColumns {
     id: number;
-    ticket_type: TicketType;
-    value: number;
+    tipo: TicketType;
+    valor: number;
     id_evento: number;
   }
 
@@ -40,14 +40,14 @@ export namespace Ingressos {
           operators: ["eq"],
           type: "number",
         },
-        ticket_type: {
+        tipo: {
           omit: false,
           operators: ["eq"],
           type: "string",
         },
-        value: {
+        valor: {
           omit: false,
-          operators: ["eq"],
+          operators: ["eq", "gt", "lt"],
           type: "number",
         },
         id_evento: {
@@ -55,12 +55,12 @@ export namespace Ingressos {
           operators: ["eq"],
           type: "number",
         },
-        created_at: {
+        criado_data: {
           omit: false,
           operators: ["eq", "gt", "lt"],
           type: "string",
         },
-        updated_at: {
+        atualizado_data: {
           omit: false,
           operators: ["eq", "gt", "lt"],
           type: "string",

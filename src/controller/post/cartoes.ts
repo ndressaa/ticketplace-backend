@@ -30,7 +30,7 @@ const controller: Controller<true, Array<Partial<Cartoes.TableType>>> = async (
     await dbClient.upsert<Partial<Cartoes.TableType>>(
       Cartoes.tableDefinition.name,
       columns,
-      ["id"],
+      ["numero_cartao", "data_expiracao", "codigo_seguranca"],
       values
     );
   } catch (error) {

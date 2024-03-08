@@ -16,7 +16,7 @@ const controller: Controller<true, Array<Partial<Empresas.TableType>>> = async (
     const { columns, values } = parsePostRequest(
       body,
       Empresas.tableDefinition,
-      ["id", "cnpj", "name", "email"]
+      ["id", "cnpj", "nome", "email"]
     );
 
     await dbClient.upsert<Partial<Empresas.TableType>>(

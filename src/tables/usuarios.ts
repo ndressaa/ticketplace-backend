@@ -6,17 +6,17 @@ export namespace Usuarios {
    */
   export interface TableType extends TimestampColumns {
     id: number;
-    name: string;
+    nome: string;
     cpf: string;
     email: string;
-    password: string;
+    senha: string;
     token?: string;
   }
 
   /**
    * Table columns that can be returned (no sensitive information)
    */
-  export type RetornableColumns = Omit<TableType, "password" | "token">;
+  export type RetornableColumns = Omit<TableType, "senha" | "token">;
 
   /**
    * Table definition
@@ -33,7 +33,7 @@ export namespace Usuarios {
           operators: ["eq"],
           type: "number",
         },
-        name: {
+        nome: {
           omit: false,
           operators: ["eq"],
           type: "string",
@@ -48,7 +48,7 @@ export namespace Usuarios {
           operators: ["eq"],
           type: "string",
         },
-        password: {
+        senha: {
           omit: true,
           operators: ["eq"],
           type: "string",
@@ -58,12 +58,12 @@ export namespace Usuarios {
           operators: ["eq"],
           type: "string",
         },
-        created_at: {
+        criado_data: {
           omit: false,
           operators: ["eq", "gt", "lt"],
           type: "string",
         },
-        updated_at: {
+        atualizado_data: {
           omit: false,
           operators: ["eq", "gt", "lt"],
           type: "string",

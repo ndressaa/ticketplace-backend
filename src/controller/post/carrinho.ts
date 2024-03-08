@@ -16,7 +16,7 @@ const controller: Controller<true, Array<Partial<Carrinho.TableType>>> = async (
     const { columns, values } = parsePostRequest(
       body,
       Carrinho.tableDefinition,
-      ["id_usuario", "id_ingresso", "ticket_class", "discount"]
+      ["id_usuario", "id_ingresso", "classe", "desconto"]
     );
 
     let placeholder = 1;

@@ -17,7 +17,7 @@ const controller: Controller<
     const { columns, values } = parsePostRequest(
       body,
       Ingressos.tableDefinition,
-      ["id", "ticket_type", "value", "id_evento"]
+      ["id", "tipo", "valor", "id_evento"]
     );
 
     await dbClient.upsert<Partial<Ingressos.TableType>>(

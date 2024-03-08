@@ -16,7 +16,15 @@ const controller: Controller<true, Array<Partial<Eventos.TableType>>> = async (
     const { columns, values } = parsePostRequest(
       body,
       Eventos.tableDefinition,
-      ["title", "description", "id_empresa", "date", "event_type", "genre"]
+      [
+        "titulo",
+        "descricao",
+        "id_empresa",
+        "data",
+        "tipo_evento",
+        "genero",
+        "capa",
+      ]
     );
 
     await dbClient.upsert<Partial<Eventos.TableType>>(

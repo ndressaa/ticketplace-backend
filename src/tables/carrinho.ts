@@ -7,8 +7,8 @@ export namespace Carrinho {
   export enum TicketClass {
     standard = "standard",
     senior = "senior",
-    student = "student",
-    promotional = "promotional",
+    student = "estudante",
+    promotional = "promocional",
   }
 
   /**
@@ -17,8 +17,8 @@ export namespace Carrinho {
   export interface TableType extends TimestampColumns {
     id_usuario: number;
     id_ingresso: number;
-    ticket_class: TicketClass;
-    discount: number;
+    classe: TicketClass;
+    desconto: number;
   }
 
   /**
@@ -46,22 +46,22 @@ export namespace Carrinho {
           operators: ["eq"],
           type: "number",
         },
-        ticket_class: {
+        classe: {
           omit: false,
           operators: ["eq"],
           type: "string",
         },
-        discount: {
+        desconto: {
           omit: false,
           operators: ["eq"],
           type: "number",
         },
-        created_at: {
+        criado_data: {
           omit: false,
           operators: ["eq", "gt", "lt"],
           type: "string",
         },
-        updated_at: {
+        atualizado_data: {
           omit: false,
           operators: ["eq", "gt", "lt"],
           type: "string",

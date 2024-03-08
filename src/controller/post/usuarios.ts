@@ -16,7 +16,7 @@ const controller: Controller<true, Array<Partial<Usuarios.TableType>>> = async (
     const { columns, values } = parsePostRequest(
       body,
       Usuarios.tableDefinition,
-      ["name", "email", "password", "cpf"]
+      ["nome", "email", "senha", "cpf"]
     );
 
     await dbClient.upsert<Partial<Usuarios.TableType>>(

@@ -7,7 +7,7 @@ export namespace Empresas {
   export interface TableType extends TimestampColumns {
     id: number;
     cnpj: string;
-    name: string;
+    nome: string;
     email: string;
   }
 
@@ -36,7 +36,7 @@ export namespace Empresas {
           operators: ["eq"],
           type: "string",
         },
-        name: {
+        nome: {
           omit: false,
           operators: ["eq"],
           type: "string",
@@ -46,12 +46,12 @@ export namespace Empresas {
           operators: ["eq"],
           type: "string",
         },
-        created_at: {
+        criado_data: {
           omit: false,
           operators: ["eq", "gt", "lt"],
           type: "string",
         },
-        updated_at: {
+        atualizado_data: {
           omit: false,
           operators: ["eq", "gt", "lt"],
           type: "string",

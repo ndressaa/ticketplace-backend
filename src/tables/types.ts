@@ -47,6 +47,6 @@ export interface TableDefinition<T extends object, R extends Partial<T>> {
  * Database content object
  */
 export interface TimestampColumns {
-  created_at: string;
-  updated_at: string;
+  criado_data: string;
+  atualizado_data: string;
 }

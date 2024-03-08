@@ -7,11 +7,12 @@ export namespace Eventos {
   export interface TableType extends TimestampColumns {
     id: number;
     id_empresa: number;
-    title: string;
-    description: string;
-    date: string;
-    event_type: Array<string>;
-    genre: Array<string>;
+    titulo: string;
+    descricao: string;
+    data: string;
+    tipo_evento: Array<string>;
+    genero: Array<string>;
+    capa: string;
   }
 
   /**
@@ -39,37 +40,42 @@ export namespace Eventos {
           operators: ["eq"],
           type: "number",
         },
-        title: {
+        titulo: {
           omit: false,
           operators: ["eq", "like"],
           type: "string",
         },
-        description: {
+        descricao: {
           omit: false,
           operators: ["eq", "like"],
           type: "string",
         },
-        date: {
+        data: {
           omit: false,
           operators: ["eq", "gt", "lt"],
           type: "string",
         },
-        event_type: {
+        tipo_evento: {
           omit: false,
           operators: ["eq"],
           type: "array",
         },
-        genre: {
+        genero: {
           omit: false,
           operators: ["eq"],
           type: "array",
         },
-        created_at: {
+        capa: {
+          omit: false,
+          operators: ["eq"],
+          type: "string",
+        },
+        criado_data: {
           omit: false,
           operators: ["eq", "gt", "lt"],
           type: "string",
         },
-        updated_at: {
+        atualizado_data: {
           omit: false,
           operators: ["eq", "gt", "lt"],
           type: "string",

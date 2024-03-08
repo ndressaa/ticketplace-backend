@@ -69,9 +69,9 @@ function parseUrlParams<
       }
 
       if (operator === "like") {
-        sql += ` AND "${
+        sql += ` AND ${
           tableDefinition.alias
-        }.${columnName}" ILIKE $${placeholderIndex++}`;
+        }."${columnName}" ILIKE $${placeholderIndex++}`;
         params.push(`%${value.toLowerCase()}%`);
       } else {
         let sqlOperator: string;
