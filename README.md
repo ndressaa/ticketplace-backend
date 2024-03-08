@@ -82,6 +82,7 @@ A seguir são listados os endpoints possíveis.
 - `empresas`
 - `carrinho`
 - `cartoes`
+- `ingressos`
 
 **NOTA**. Com exceção dos endpoints `newUser` e `login`, é necessário o envio do token recebido no processo de `login` ou `criação de usuário` pelo header `Authorization` to tipo `Bearer` conforme exemplos a seguir.
 
