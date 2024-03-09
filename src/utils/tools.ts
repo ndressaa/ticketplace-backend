@@ -100,6 +100,7 @@ function parseUrlParams<
       sql += ` AND ${
         tableDefinition.alias
       }."${columnName}" = $${placeholderIndex++}`;
+      params.push(value);
     }
   });
 
