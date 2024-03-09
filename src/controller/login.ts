@@ -222,7 +222,7 @@ export const login: Controller<ResponseObject<Token>> = async (context) => {
     const decodedAuth = Buffer.from(auth, "base64").toString().split(":");
     const email = decodedAuth[0];
     const pass = decodedAuth[1];
-    console.log(`email: ${email} pass: ${pass}`);
+    console.debug(`email: ${email} pass: ${pass}`);
     if (email && pass) {
       const foundUser = await dbClient.query<Usuarios.TableType>(
         `SELECT * FROM public.tb_usuarios WHERE "email" = $1`,
