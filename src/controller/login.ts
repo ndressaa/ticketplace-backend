@@ -3,38 +3,36 @@ import { genSalt, hash, compare } from "bcrypt";
 import type { Context } from "../types";
 import type { Controller, ResponseObject } from "./types";
 import type { Token } from "./types";
-import type { User } from "../tables/user";
-import type { DBColumns } from "../tables/types";
 
 import ControllerError from "./ControllerError";
 import DBClient from "../utils/DBClient";
-import { getRetornableUserColumns } from "../tables/user";
+import { Usuarios } from "../tables/usuarios";
 
 const dbClient = new DBClient();
 
 const tokenExpiration = 60 * 60 * 24; // 24 hours
 
 /**
- * Hash the password
+ * Hash the senha
  *
- * @param password
+ * @param senha
  * @returns
  */
-async function hashPassword(password: string) {
+async function hashPassword(senha: string) {
   const salt = await genSalt(10);
-  const hashPassword = await hash(password, salt);
+  const hashPassword = await hash(senha, salt);
   return hashPassword;
 }
 
 /**
- * Compare given password with the hash
+ * Compare given senha with the hash
  *
- * @param password
+ * @param senha
  * @param hash
  * @returns
  */
-async function comparePasswords(password: string, hash: string) {
-  return await compare(password, hash);
+async function comparePasswords(senha: string, hash: string) {
+  return await compare(senha, hash);
 }
 
 /**
@@ -102,8 +100,8 @@ export const validateToken = async (context: Context): Promise<boolean> => {
       try {
         decodeToken(token);
 
-        const foundUser = await dbClient.query<User>(
-          `SELECT * FROM public.user WHERE "token" = $1`,
+        const foundUser = await dbClient.query<Usuarios.TableType>(
+          `SELECT * FROM public.tb_usuarios WHERE "token" = $1`,
           [token]
         );
 
@@ -124,32 +122,36 @@ export const validateToken = async (context: Context): Promise<boolean> => {
  *
  * @param context
  */
-export const newUser: Controller<ResponseObject<Token>> = async (context) => {
+export const newUser: Controller<
+  ResponseObject<Token>,
+  Array<Partial<Usuarios.TableType>>
+> = async (context) => {
   const { body } = context;
-
-  if (!body) {
-    throw new ControllerError("Invalid data received: Missing body", 400);
+  if (body.length !== 1) {
+    throw new ControllerError(
+      `Invalid data received: Body length (${body.length})`,
+      400
+    );
   }
 
   try {
-    const data = JSON.parse(body) as Partial<User>;
-    const { name, email, password } = data;
+    const { nome, email, senha, cpf } = body[0];
 
-    if (!name || !email || !password) {
+    if (!nome || !email || !senha || !cpf) {
       throw new ControllerError(
         `Invalid data received: Missing ${
-          !name ? "name" : !email ? "email" : "password"
+          !nome ? "nome" : !email ? "email" : !senha ? "senha" : "cpf"
         }`,
         400
       );
     }
 
-    const hashedPassword = await hashPassword(password);
+    const hashedPassword = await hashPassword(senha);
     const token = getToken();
 
     console.debug({
       newUser: {
-        data,
+        body,
         hashedPassword,
         token,
       },
@@ -157,12 +159,12 @@ export const newUser: Controller<ResponseObject<Token>> = async (context) => {
 
     const dbTransaction = await dbClient.startTransaction();
 
-    const user = await dbClient.query<DBColumns<User>>(
-      `INSERT INTO public.user
-        ("name", "email", "password", "token") 
-      VALUES ($1, $2, $3, $3)
+    const user = await dbClient.query<Usuarios.TableType>(
+      `INSERT INTO public.tb_usuarios
+        ("nome", "email", "cpf", "senha", "token") 
+      VALUES ($1, $2, $3, $4, $5)
       RETURNING *`,
-      [name, email, hashedPassword, token],
+      [nome, email, cpf, hashedPassword, token],
       dbTransaction
     );
 
@@ -177,7 +179,18 @@ export const newUser: Controller<ResponseObject<Token>> = async (context) => {
 
     const payload: ResponseObject<Token> = {
       statusCode: 201,
-      content: { token, user: getRetornableUserColumns(user[0]) },
+      content: {
+        token,
+        user: Object.entries(user[0]).reduce((acc, [col, value]) => {
+          if (
+            Usuarios.tableDefinition.colummns[col as keyof Usuarios.TableType]
+              ?.omit === false
+          ) {
+            acc[col as keyof Usuarios.RetornableColumns] = value as never;
+          }
+          return acc;
+        }, {} as Usuarios.RetornableColumns),
+      },
     };
 
     return payload;
@@ -209,10 +222,10 @@ export const login: Controller<ResponseObject<Token>> = async (context) => {
     const decodedAuth = Buffer.from(auth, "base64").toString().split(":");
     const email = decodedAuth[0];
     const pass = decodedAuth[1];
-    console.log(`email: ${email} pass: ${pass}`);
+    console.debug(`email: ${email} pass: ${pass}`);
     if (email && pass) {
-      const foundUser = await dbClient.query<User>(
-        `SELECT * FROM public.user WHERE "email" = $1`,
+      const foundUser = await dbClient.query<Usuarios.TableType>(
+        `SELECT * FROM public.tb_usuarios WHERE "email" = $1`,
         [email]
       );
       console.debug({
@@ -232,13 +245,13 @@ export const login: Controller<ResponseObject<Token>> = async (context) => {
       }
 
       if (foundUser.length !== 0) {
-        const { password } = foundUser[0];
-        const isPasswordValid = await comparePasswords(pass, password);
+        const { senha } = foundUser[0];
+        const isPasswordValid = await comparePasswords(pass, senha);
         console.debug({
           login: {
             passwordCompare: {
               receivedPassword: pass,
-              dbPassword: password,
+              dbPassword: senha,
               valid: isPasswordValid,
             },
           },
@@ -248,7 +261,7 @@ export const login: Controller<ResponseObject<Token>> = async (context) => {
 
           await dbClient.query(
             `
-            UPDATE public.user
+            UPDATE public.tb_usuarios
             SET "token" = $1
             WHERE "email" = $2
           `,
@@ -257,7 +270,19 @@ export const login: Controller<ResponseObject<Token>> = async (context) => {
 
           const payload: ResponseObject<Token> = {
             statusCode: 201,
-            content: { token, user: getRetornableUserColumns(foundUser[0]) },
+            content: {
+              token,
+              user: Object.entries(foundUser[0]).reduce((acc, [col, value]) => {
+                if (
+                  Usuarios.tableDefinition.colummns[
+                    col as keyof Usuarios.TableType
+                  ]?.omit === false
+                ) {
+                  acc[col as keyof Usuarios.RetornableColumns] = value as never;
+                }
+                return acc;
+              }, {} as Usuarios.RetornableColumns),
+            },
           };
 
           return payload;

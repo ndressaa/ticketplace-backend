@@ -5,12 +5,13 @@ import type { Request, Response } from "./types";
 import middlewares from "./middleware";
 
 function isValidMethod(method: string): method is keyof typeof middlewares {
-  return method === "get" || method === "post";
+  return method === "get" || method === "post" || method === "delete";
 }
 
 const server = http.createServer(
   async (req: http.IncomingMessage, res: http.ServerResponse) => {
     const raiseError = (statusCode: number, message: string) => {
+      console.error(`Error ${statusCode}: ${message}`);
       res.writeHead(statusCode, { "Content-Type": "application/json" });
       res.end(JSON.stringify({ error: message }));
     };
@@ -49,7 +50,6 @@ const server = http.createServer(
     if (!isValidMethod(method)) return raiseError(405, "Method not allowed");
 
     const context = { request, response };
-
     // Call the middleware
     await middlewares[method](context);
 
@@ -61,5 +61,5 @@ const server = http.createServer(
 );
 
 server.listen(8080, () => {
-  console.log("Server HTTP running on port 8080");
+  console.debug("Server HTTP running on port 8080");
 });

@@ -1,3 +1,6 @@
+/**
+ * Custom error class for controller errors
+ */
 class ControllerError extends Error {
   statusCode?: number;
 

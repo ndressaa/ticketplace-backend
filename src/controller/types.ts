@@ -1,7 +1,7 @@
 import type { IncomingHttpHeaders } from "http";
 
-import type { RetornableColumns } from "../tables/types";
-import type { RetornableUserColumns } from "../tables/user";
+import type { RetornableColumns } from "../tables";
+import type { Usuarios } from "../tables/usuarios";
 export interface Token {
   /**
    * The loged user token
@@ -17,7 +17,7 @@ export interface Token {
   /**
    * The user information
    */
-  user: RetornableUserColumns;
+  user: Usuarios.RetornableColumns;
 }
 
 /**
@@ -36,7 +36,7 @@ export type ReturnContent = Array<RetornableColumns> | ResponseObject;
 /**
  * Controller context
  */
-export type Context = {
+export type Context<T extends Array<any> | undefined> = {
   /**
    * The search params
    */
@@ -51,21 +51,39 @@ export type Context = {
    * If present, content must include only the object with the given id
    */
   id?: string;
-
-  /**
-   * Request body
-   */
-  body?: string;
-};
+} & (T extends Array<any>
+  ? {
+      /**
+       * Request body
+       */
+      body: T;
+    }
+  : {});
 
 /**
  * Controller function
  */
-export type Controller<T extends boolean | ReturnContent> = (
-  context: Context
-) => Promise<undefined | T>;
+export type Controller<
+  T extends boolean | ReturnContent,
+  B extends Array<any> | undefined = undefined
+> = (context: Context<B>) => Promise<undefined | T>;
 
 /**
- * Allowed controller names
+ * Enpoints (controller names)
  */
-export type ControllerName = "login" | "newUser" | "users" | "shows";
+export type Endpoints =
+  /**
+   * Manual endpoints (no table direct reference)
+   */
+  | "login"
+  | "newUser"
+
+  /**
+   * Table endpoints
+   */
+  | "eventos"
+  | "carrinho"
+  | "cartoes"
+  | "empresas"
+  | "ingressos"
+  | "usuarios";
