@@ -1,17 +1,31 @@
-import type { ControllerName } from "../types";
+import type { Endpoints } from "../types";
 
-import users from "./users";
-import shows from "./shows";
+import carrinho from "./carrinho";
+import cartoes from "./cartoes";
+import empresas from "./empresas";
+import eventos from "./eventos";
+import ingressos from "./ingressos";
+import usuarios from "./usuarios";
 
 import { newUser } from "../login";
 
-const controllers: Record<
-  "users" | "shows" | "newUser",
-  typeof users | typeof shows | typeof newUser
-> = {
-  users,
-  shows,
+type EndpointsControllers =
+  | typeof usuarios
+  | typeof eventos
+  | typeof newUser
+  | typeof carrinho
+  | typeof cartoes
+  | typeof empresas
+  | typeof ingressos;
+
+const controllers: Record<Exclude<Endpoints, "login">, EndpointsControllers> = {
+  usuarios,
+  eventos,
   newUser,
+  carrinho,
+  cartoes,
+  empresas,
+  ingressos,
 };
 
 export default controllers;
