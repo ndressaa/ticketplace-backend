@@ -1,3 +1,4 @@
+import type { PoolClient } from "pg";
 import type { Controller } from "../types";
 
 import { Carrinho } from "../../tables";
@@ -12,6 +13,7 @@ const controller: Controller<true, Array<Partial<Carrinho.TableType>>> = async (
 ) => {
   const { id, searchParams, body } = context;
 
+  let transaction: PoolClient | undefined = undefined;
   try {
     const { columns, values } = parsePostRequest(
       body,
@@ -36,18 +38,27 @@ const controller: Controller<true, Array<Partial<Carrinho.TableType>>> = async (
     )
     SELECT COUNT(*) AS "new_lines_count" FROM new_lines;`;
 
-    const result = await dbClient.query<{ new_lines_count: number }>(
+    transaction = await dbClient.startTransaction();
+
+    const result = await dbClient.query<{ new_lines_count: string }>(
       sql,
-      values.flat()
+      values.flat(),
+      transaction
     );
 
-    if (!result[0] || result[0].new_lines_count !== values.length) {
+    if (!result[0] || parseInt(result[0].new_lines_count) !== values.length) {
       throw new ControllerError(
-        `Internal server error: Failed on insert new lines (${result[0].new_lines_count} <> ${values.length})`,
+        `Internal server error: Failed on insert new lines (${
+          (result[0] || {}).new_lines_count
+        } <> ${values.length})`,
         500
       );
     }
+
+    await DBClient.commitTransaction(transaction);
   } catch (error) {
+    if (transaction) await DBClient.rollbackTransaction(transaction);
+
     if (error instanceof ControllerError) throw error;
     throw new ControllerError((error as Error).message, 400);
   }
