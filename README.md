@@ -1,6 +1,16 @@
 # TicketPlace Backend
 
-**Table of Contents**:
+Prtojeto de _BACKEND_ para o sistema de compra de ingressos para eventos, `TicketPlace` da disciplina `PROJETO INTEGRADO: DESENVOLVIMENTO DE SISTEMAS ORIENTADO A DISPOSITIVOS MÓVEIS E BASEADOS NA WEB` do SENAC.
+
+## Integrantes do grupo
+
+ANDRESSA DOS SANTOS JUCOSKI  
+BRUNO NATALI  
+ISMAEL M. VASCONCELOS JUNIOR  
+LUIZ FERNANDO VIDAL  
+MATEUS VIEIRA DA SILVA  
+
+## Table of Contents
 
 - [Execução](#execução)
   - [Apenas a aplicação](#apenas-a-aplicação)
